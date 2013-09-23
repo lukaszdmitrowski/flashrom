@@ -1217,8 +1217,7 @@ notfound:
 	return chip - flashchips;
 }
 
-int read_buf_from_file(unsigned char *buf, unsigned long size,
-		       const char *filename)
+int read_buf_from_file(unsigned char *buf, unsigned long size, const char *filename, const char *size_msg)
 {
 #ifdef __LIBPAYLOAD__
 	msg_gerr("Error: No file I/O support in libpayload\n");
@@ -1238,8 +1237,10 @@ int read_buf_from_file(unsigned char *buf, unsigned long size,
 		return 1;
 	}
 	if (image_stat.st_size != size) {
-		msg_gerr("Error: Image size (%jd B) doesn't match the flash chip's size (%lu B)!\n",
-			 (intmax_t)image_stat.st_size, size);
+		if (size_msg == NULL)
+			size_msg = "the expected size";
+		msg_gerr("Error: Image size (%jd B) doesn't match %s (%lu B)!\n",
+			 (intmax_t)image_stat.st_size, size_msg, size);
 		fclose(image);
 		return 1;
 	}
@@ -1962,7 +1963,7 @@ int doit(struct flashctx *flash, int force, const char *filename, int read_it,
 	}
 
 	if (write_it || verify_it) {
-		if (read_buf_from_file(newcontents, size, filename)) {
+		if (read_buf_from_file(newcontents, size, filename, "the flash chip's size")) {
 			ret = 1;
 			goto out;
 		}
@@ -1996,7 +1997,12 @@ int doit(struct flashctx *flash, int force, const char *filename, int read_it,
 	msg_cinfo("done.\n");
 
 	/* Build a new image taking the given layout into account. */
-	build_new_image(flash, oldcontents, newcontents);
+	if (build_new_image(flash, oldcontents, newcontents)) {
+		msg_gerr("Could not prepare the data to be written due to problems with the layout,\n"
+			 "aborting.\n");
+		ret = 1;
+		goto out;
+	}
 
 	// ////////////////////////////////////////////////////////////
 
