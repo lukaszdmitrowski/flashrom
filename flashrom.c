@@ -622,7 +622,7 @@ static unsigned int count_usable_erasers(const struct flashctx *flash)
 	return usable_erasefunctions;
 }
 
-static int compare_range(const uint8_t *wantbuf, const uint8_t *havebuf, unsigned int start, unsigned int len)
+int compare_range(const uint8_t *wantbuf, const uint8_t *havebuf, unsigned int start, unsigned int len)
 {
 	int ret = 0, failcount = 0;
 	unsigned int i;
@@ -1649,7 +1649,7 @@ int erase_and_write_flash(struct flashctx *flash, uint8_t *oldcontents, uint8_t 
 	return ret;
 }
 
-static void nonfatal_help_message(void)
+void nonfatal_help_message(void)
 {
 	msg_gerr("Good, writing to the flash chip apparently didn't do anything.\n");
 #if CONFIG_INTERNAL == 1
@@ -1667,7 +1667,7 @@ static void nonfatal_help_message(void)
 			 "mail flashrom@flashrom.org, thanks!\n");
 }
 
-static void emergency_help_message(void)
+void emergency_help_message(void)
 {
 	msg_gerr("Your flash chip is in an unknown state.\n");
 #if CONFIG_INTERNAL == 1
@@ -1691,7 +1691,7 @@ void list_programmers(const char *delim)
 		if (p < PROGRAMMER_INVALID - 1)
 			msg_ginfo("%s", delim);
 	}
-	msg_ginfo("\n");	
+	msg_ginfo("\n");
 }
 
 void list_programmers_linebreak(int startcol, int cols, int paren)
