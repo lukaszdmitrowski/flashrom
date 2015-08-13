@@ -84,6 +84,7 @@ int fl_programmer_shutdown(void);
 struct flashctx;
 typedef struct flashctx fl_flashctx_t;
 int fl_flash_probe(fl_flashctx_t **, const char *chip_name);
+const char** fl_multiple_flash_probe(int *chip_count);
 size_t fl_flash_getsize(const fl_flashctx_t *);
 int fl_flash_erase(fl_flashctx_t *);
 void fl_flash_release(fl_flashctx_t *);

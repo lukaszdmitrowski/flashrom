@@ -343,6 +343,47 @@ int fl_flash_probe(fl_flashctx_t **const flashctx, const char *const chip_name)
 }
 
 /**
+ * @brief Returns string list of multiple chips found
+ *
+ * Probes for all known flash chips and returns string list of found chips.
+ * Should be used only when multiple chips were found by fl_flash_probe
+ *
+ * @param[out] pointer to integer - filled by a number of found chips
+ * @return String list of multiple chips found
+ */
+const char** fl_multiple_flash_probe(int *chip_count)
+{
+        const char **chip_names = NULL;
+        struct flashctx flashes[6] = {{0}};
+        int chip_index = 0;
+        int i = 0;
+
+        chip_to_probe = NULL;
+        *chip_count = 0;
+
+        while (*chip_count < ARRAY_SIZE(flashes)) {
+                chip_index = probe_flash(&registered_masters[i], chip_index,
+                                         &flashes[*chip_count], 0);
+                if (chip_index == -1)
+                        break;
+                ++chip_index;
+                ++(*chip_count);
+        }
+
+        chip_names = malloc((*chip_count) * sizeof(char*));
+
+        if (!chip_names) {
+                msg_gerr("Out of memory!");
+        } else {
+                for (; i < *chip_count; ++i) {
+                        chip_names[i] = flashes[i].chip->name;
+                }
+        }
+
+        return chip_names;
+}
+
+/**
  * @brief Returns the size of the specified flash chip in bytes.
  *
  * @param flashctx The queried flash context.
