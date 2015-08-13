@@ -38,6 +38,46 @@ typedef enum { /* This has to match enum msglevel. */
 typedef int(fl_log_callback_t)(fl_log_level_t, const char *format, va_list);
 void fl_set_log_callback(fl_log_callback_t *);
 
+typedef enum {
+        FL_TESTED_OK  = 0,
+        FL_TESTED_NT  = 1,
+        FL_TESTED_BAD = 2,
+        FL_TESTED_DEP = 3,
+        FL_TESTED_NA  = 4,
+} fl_test_state;
+
+typedef struct {
+        const char *vendor;
+        const char *name;
+        unsigned int total_size;
+
+        struct fl_tested {
+                fl_test_state probe;
+                fl_test_state read;
+                fl_test_state erase;
+                fl_test_state write;
+        } tested;
+} fl_flashchip_info;
+
+typedef struct {
+        const char *vendor;
+        const char *name;
+        fl_test_state working;
+} fl_board_info;
+
+typedef struct {
+        const char *vendor;
+        const char *chipset;
+        fl_test_state status;
+} fl_chipset_info;
+
+const char** fl_supported_programmers(void);
+const char* fl_version(void);
+fl_flashchip_info *fl_supported_flash_chips(void);
+fl_board_info *fl_supported_boards(void);
+fl_chipset_info *fl_supported_chipsets(void);
+int fl_data_free(void *const p);
+
 int fl_programmer_init(const char *prog_name, const char *prog_params);
 int fl_programmer_shutdown(void);
 

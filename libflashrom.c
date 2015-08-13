@@ -103,7 +103,144 @@ int print(const enum msglevel level, const char *const fmt, ...)
  * @{
  */
 
-/* TBD */
+/**
+ * @brief Returns flashrom version
+ * @return Flashrom version
+ */
+const char *fl_version(void)
+{
+        return flashrom_version;
+}
+
+/**
+ * @brief Returns a list of supported programmers
+ * @return List of supported programmers
+ */
+const char **fl_supported_programmers(void)
+{
+        enum programmer p = 0;
+        const char **supported_programmers = NULL;
+
+        supported_programmers = malloc((PROGRAMMER_INVALID + 1) * sizeof(char*));
+        if (!supported_programmers) {
+                msg_gerr("Out of memory!");
+        } else {
+                for (; p < PROGRAMMER_INVALID; ++p) {
+                        supported_programmers[p] = programmer_table[p].name;
+                }
+                supported_programmers[PROGRAMMER_INVALID] = NULL;
+        }
+
+        return supported_programmers;
+}
+
+/**
+ * @brief Returns list of supported flash ROM chips
+ * @return List of supported flash ROM chips
+ */
+fl_flashchip_info *fl_supported_flash_chips(void)
+{
+        int i = 0;
+        fl_flashchip_info *flashchip_info = NULL;
+
+        flashchip_info = malloc(flashchips_size * sizeof(fl_flashchip_info));
+        if (!flashchip_info) {
+                msg_gerr("Out of memory!");
+        } else {
+                for (; i < flashchips_size; ++i) {
+                        flashchip_info[i].vendor = flashchips[i].vendor;
+                        flashchip_info[i].name = flashchips[i].name;
+                        flashchip_info[i].tested.erase = flashchips[i].tested.erase;
+                        flashchip_info[i].tested.probe = flashchips[i].tested.probe;
+                        flashchip_info[i].tested.read = flashchips[i].tested.read;
+                        flashchip_info[i].tested.write = flashchips[i].tested.write;
+                        flashchip_info[i].total_size = flashchips[i].total_size;
+                }
+        }
+
+        return flashchip_info;
+}
+
+/**
+ * @brief Returns list of supported mainboards
+ * @return List of supported mainborads
+ */
+fl_board_info *fl_supported_boards(void)
+{
+        const struct board_info *binfo = boards_known;
+        fl_board_info *supported_boards = NULL;
+        int boards_known_size = 0;
+        int i = 0;
+
+        while ((binfo++)->vendor)
+                ++boards_known_size;
+        binfo = boards_known;
+        /* add place for {0} */
+        ++boards_known_size;
+
+        supported_boards = malloc(boards_known_size * sizeof(fl_board_info));
+
+        if (!supported_boards) {
+                msg_gerr("Out of memory!");
+        } else {
+                for (; i < boards_known_size; ++i) {
+                        supported_boards[i].vendor = binfo[i].vendor;
+                        supported_boards[i].name = binfo[i].name;
+                        supported_boards[i].working = binfo[i].working;
+                }
+        }
+
+        return supported_boards;
+}
+
+/**
+ * @brief Returns list of supported chipsets
+ * @return List of supported chipsets
+ */
+fl_chipset_info *fl_supported_chipsets(void)
+{
+        const struct penable *chipset = chipset_enables;
+        fl_chipset_info *supported_chipsets = NULL;
+        int chipset_enbales_size = 0;
+        int i = 0;
+
+        while ((chipset++)->vendor_name)
+                ++chipset_enbales_size;
+        chipset = chipset_enables;
+        /* add place for {0}*/
+        ++chipset_enbales_size;
+
+        supported_chipsets = malloc(chipset_enbales_size * sizeof(fl_chipset_info));
+
+        if (!supported_chipsets) {
+                msg_gerr("Out of memory!");
+        } else {
+                for (; i < chipset_enbales_size; ++i) {
+                        supported_chipsets[i].vendor = chipset[i].vendor_name;
+                        supported_chipsets[i].chipset = chipset[i].device_name;
+                        supported_chipsets[i].status = chipset[i].status;
+                }
+        }
+
+        return supported_chipsets;
+}
+
+/**
+ * @brief Frees fl_*_info and string lists allocated by flashrom
+ * @param Pointer to block of memory which should be freed
+ * @return 0 on success
+ *         1 on null pointer error
+ */
+int fl_data_free(void *const p)
+{
+        if (!p) {
+                msg_gerr("Null pointer!");
+                return 1;
+        } else {
+                free(p);
+                return 0;
+        }
+}
 
 /** @} */ /* end fl-query */
 
